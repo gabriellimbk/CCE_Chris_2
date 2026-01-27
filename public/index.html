@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CCE Scenario Interactive</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="scene">
+    <div class="scene-header">
+      <div id="scenarioTitle" class="title-bubble">Select a scenario</div>
+      <div class="controls">
+        <div class="dropdown-wrap">
+          <select id="scenarioSelect" aria-label="Select scenario"></select>
+          <img src="assets/buttons/dropdown.png" alt="" class="dropdown-icon" />
+        </div>
+        <button id="infoBtn" class="icon-btn" aria-label="Scenario info">Info</button>
+        <button id="resetBtn" class="icon-btn" type="button" aria-label="Reset">Reset</button>
+      </div>
+    </div>
+
+    <div class="map-area">
+      <button id="usBtn" class="map-btn pos-us" aria-label="US">
+        <img src="assets/buttons/us.png" alt="US" />
+      </button>
+      <button id="chinaBtn" class="map-btn pos-china" aria-label="China">
+        <img src="assets/buttons/china.png" alt="China" />
+      </button>
+      <button id="cambodiaBtn" class="map-btn pos-cambodia" aria-label="Cambodia">
+        <img src="assets/buttons/cambodia.png" alt="Cambodia" />
+      </button>
+      <button id="singaporeBtn" class="map-btn pos-singapore" aria-label="Singapore">
+        <img src="assets/buttons/singapore.png" alt="Singapore" />
+      </button>
+
+      <img id="usBodyImg" class="map-body pos-us-body" src="assets/buttons/usbody.png" alt="" />
+      <img id="chinaBodyImg" class="map-body pos-china-body" src="assets/buttons/chinabody.png" alt="" />
+      <img id="cambodiaBodyImg" class="map-body pos-cambodia-body" src="assets/buttons/cambodiabody.png" alt="" />
+
+      <button id="respondBtn" class="respond-btn" aria-label="Respond">
+        <img src="assets/buttons/respond.png" alt="Respond" />
+      </button>
+    </div>
+  </div>
+
+  <div id="popup-info" class="popup" aria-hidden="true">
+    <div class="popup-inner">
+      <button id="soundOnBtn" class="popup-sound" aria-label="Play scenario audio">
+        <img src="assets/buttons/soundon.png" alt="Sound on" />
+      </button>
+      <button id="soundOffBtn" class="popup-sound" aria-label="Stop scenario audio" hidden>
+        <img src="assets/buttons/soundoff.png" alt="Sound off" />
+      </button>
+      <button class="popup-close" data-close="popup-info" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <h2 id="infoTitle" class="popup-title"></h2>
+      <div id="infoText" class="popup-body"></div>
+    </div>
+  </div>
+
+  <div id="popup-respond" class="popup" aria-hidden="true">
+    <div class="popup-inner">
+      <button class="popup-close" data-close="popup-respond" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <h2 id="respondTitle" class="popup-title"></h2>
+      <div class="respond-row respond-options">
+        <button id="respondMindefBtn" class="respond-choice" type="button"></button>
+        <button id="respondMtiBtn" class="respond-choice" type="button"></button>
+        <button id="respondMhaBtn" class="respond-choice" type="button"></button>
+      </div>
+      <p id="status" class="status"></p>
+    </div>
+  </div>
+
+  <div id="popup-feedback" class="popup" aria-hidden="true">
+    <div class="popup-inner popup-wide">
+      <button class="popup-close" data-close="popup-feedback" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <h2 id="feedbackTitle" class="popup-title"></h2>
+      <div class="feedback-layout">
+        <div class="feedback-buttons">
+          <button id="feedbackUsBtn" class="face-btn" aria-label="US feedback">
+            <img src="assets/buttons/us2.png" alt="US" />
+          </button>
+          <button id="feedbackChinaBtn" class="face-btn" aria-label="China feedback">
+            <img src="assets/buttons/china2.png" alt="China" />
+          </button>
+          <button id="feedbackCambodiaBtn" class="face-btn" aria-label="Cambodia feedback">
+            <img src="assets/buttons/cambodia2.png" alt="Cambodia" />
+          </button>
+          <button id="feedbackSingaporeBtn" class="face-btn" aria-label="Singapore feedback">
+            <img src="assets/buttons/singapore2.png" alt="Singapore" />
+          </button>
+        </div>
+        <div class="feedback-area">
+          <div id="feedbackUs" class="feedback-panel">
+            <div class="feedback-source">Statement from US Leader</div>
+            <div class="feedback-text"></div>
+          </div>
+          <div id="feedbackChina" class="feedback-panel">
+            <div class="feedback-source">Statement from China Leader</div>
+            <div class="feedback-text"></div>
+          </div>
+          <div id="feedbackSingapore" class="feedback-panel">
+            <div class="feedback-source">Singapore Public Sentiment</div>
+            <div class="feedback-text"></div>
+          </div>
+          <div id="feedbackCambodia" class="feedback-panel">
+            <div class="feedback-source">Statement from Cambodia Leader</div>
+            <div class="feedback-text"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-us" class="popup" aria-hidden="true">
+    <div class="popup-inner shift-down">
+      <button class="popup-close" data-close="popup-us" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <div class="leader-header">
+        <h2 class="popup-title">US Leader Address</h2>
+      </div>
+      <div id="usLeaderText" class="popup-body"></div>
+    </div>
+  </div>
+
+  <div id="popup-china" class="popup" aria-hidden="true">
+    <div class="popup-inner shift-down">
+      <button class="popup-close" data-close="popup-china" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <div class="leader-header">
+        <h2 class="popup-title">China Leader Address</h2>
+      </div>
+      <div id="chinaLeaderText" class="popup-body"></div>
+    </div>
+  </div>
+
+  <div id="popup-cambodia" class="popup" aria-hidden="true">
+    <div class="popup-inner shift-down">
+      <button class="popup-close" data-close="popup-cambodia" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <div class="leader-header">
+        <h2 class="popup-title">Cambodia Leader Address</h2>
+      </div>
+      <div id="cambodiaLeaderText" class="popup-body"></div>
+    </div>
+  </div>
+
+  <div id="popup-singapore" class="popup" aria-hidden="true">
+    <div class="popup-inner cabinet-popup">
+      <button class="popup-close" data-close="popup-singapore" aria-label="Close">
+        <img src="assets/buttons/close.png" alt="Close" />
+      </button>
+      <div class="cabinet-header">
+        <h2 class="popup-title">Cabinet of Singapore</h2>
+      </div>
+      <div class="cabinet-layout">
+        <div class="cabinet-buttons">
+          <button id="singaporeFace1Btn" class="face-btn" aria-label="Singapore cabinet member 1">
+            <img src="assets/buttons/singaporeface1.png" alt="Singapore face 1" />
+          </button>
+          <button id="singaporeFace2Btn" class="face-btn" aria-label="Singapore cabinet member 2">
+            <img src="assets/buttons/singaporeface2.png" alt="Singapore face 2" />
+          </button>
+          <button id="singaporeFace3Btn" class="face-btn" aria-label="Singapore cabinet member 3">
+            <img src="assets/buttons/singaporeface3.png" alt="Singapore face 3" />
+          </button>
+        </div>
+        <div id="singaporeSectionText" class="cabinet-panel"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
