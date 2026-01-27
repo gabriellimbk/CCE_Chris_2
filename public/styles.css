@@ -410,6 +410,13 @@ textarea {
   height: 90px;
 }
 
+#singaporeFace1Btn,
+#singaporeFace2Btn,
+#singaporeFace3Btn {
+  width: calc(90px * 1.3);
+  height: calc(90px * 1.3);
+}
+
 .face-btn img {
   width: 100%;
   height: auto;
@@ -495,6 +502,7 @@ textarea {
   display: none;
   width: 100%;
   max-width: 760px;
+  margin-left: 20px;
 }
 
 .cabinet-panel.active {
