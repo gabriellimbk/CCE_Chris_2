@@ -91,14 +91,15 @@ function loadInstructions() {
 }
 
 function buildPrompt(scenario, userResponse) {
-  const addresses = scenario.televised_addresses || {};
+  const round = scenario.rounds?.[0] || scenario;
+  const addresses = round.televised_addresses || {};
   const actorBlocks = Object.entries(addresses).map(([key, text]) => {
     const name = key.replace(/_/g, ' ');
     return `${name} (televised_address): ${text}`;
   }).join('\n');
 
   const instructions = loadInstructions();
-  const includeCambodia = Boolean(scenario.televised_addresses?.Cambodia);
+  const includeCambodia = Boolean(round.televised_addresses?.Cambodia);
 
   return `You are an AI reviewer.
 Task: provide feedback on the user's response from four perspectives.
@@ -107,8 +108,8 @@ Instructions:
 ${instructions || 'Use the scenario context and the user response.'}
 
 Scenario:
-Title: ${scenario.title}
-Text: ${scenario.scenario_text}
+Title: ${scenario.title}${round.title ? ` — ${round.title}` : ''}
+Text: ${round.scenario_text}
 
 Key actors and positions:
 ${actorBlocks}

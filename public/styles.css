@@ -33,9 +33,9 @@ body {
 
 .scene-header {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 12px;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   margin-bottom: 16px;
 }
@@ -46,14 +46,34 @@ body {
   padding: 14px 20px;
   border-radius: 999px;
   font-family: "Fraunces", serif;
-  font-size: clamp(1rem, 2.4vw, 1.4rem);
+  font-size: clamp(0.95rem, 2.1vw, 1.25rem);
   font-weight: 700;
+  line-height: 1.2;
+  max-width: min(72%, 860px);
+  flex: 1 1 60%;
+  margin-top: 0;
+  min-width: 0;
+}
+
+.title-bubble .title-main,
+.title-bubble .title-sub {
+  display: block;
+}
+
+.title-bubble .title-sub {
+  font-size: 0.9em;
+  opacity: 0.9;
+  margin-top: 4px;
 }
 
 .controls {
   display: flex;
   gap: 10px;
   align-items: center;
+  margin-left: auto;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  flex-shrink: 0;
 }
 
 .dropdown-wrap {
@@ -194,17 +214,17 @@ body {
 }
 
 .pos-us-body {
-  left: calc(8% - 50px);
+  left: 1px;
   top: calc(18% - 140px);
 }
 
 .pos-china-body {
-  right: calc(6% - 25px);
+  right: 1px;
   top: calc(18% - 120px);
 }
 
 .pos-cambodia-body {
-  right: calc(22% - 255px);
+  right: 1px;
   top: calc(42% - 260px);
 }
 
@@ -533,6 +553,15 @@ textarea {
 }
 
 @media (max-width: 800px) {
+  .scene-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .title-bubble {
+    max-width: 100%;
+  }
+
   .feedback-layout {
     grid-template-columns: 1fr;
   }

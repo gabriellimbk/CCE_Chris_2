@@ -34,6 +34,7 @@ const feedbackUsBtn = document.getElementById('feedbackUsBtn');
 const feedbackChinaBtn = document.getElementById('feedbackChinaBtn');
 const feedbackSingaporeBtn = document.getElementById('feedbackSingaporeBtn');
 const feedbackCambodiaBtn = document.getElementById('feedbackCambodiaBtn');
+const feedbackContinueBtn = document.getElementById('feedbackContinueBtn');
 const feedbackUs = document.getElementById('feedbackUs');
 const feedbackChina = document.getElementById('feedbackChina');
 const feedbackSingapore = document.getElementById('feedbackSingapore');
@@ -52,6 +53,7 @@ const cambodiaBodyImg = document.getElementById('cambodiaBodyImg');
 
 let scenarios = [];
 let activeScenario = null;
+let activeRoundIndex = 0;
 let feedbackBlocks = null;
 let ttsAudio = null;
 let ttsAudioUrl = '';
@@ -79,7 +81,10 @@ function openPopup(popup) {
     cambodiaBodyImg.classList.add('visible');
   }
   if (popup === infoPopup && activeScenario) {
-    startTts(activeScenario.scenario_text);
+    const round = getActiveRound();
+    if (round?.scenario_text) {
+      startTts(round.scenario_text);
+    }
   }
 }
 
@@ -145,11 +150,11 @@ function setCabinetPanel({ minister, recommendation, reasoning }) {
 
   const rec = document.createElement('div');
   rec.className = 'cabinet-panel-rec';
-  rec.textContent = `Recommendation: ${recommendation}`;
+  rec.textContent = `Recommendation: ${recommendation || 'Recommendation unavailable.'}`;
 
   const reason = document.createElement('div');
   reason.className = 'cabinet-panel-reason';
-  reason.textContent = reasoning;
+  reason.textContent = reasoning || 'Explanation unavailable.';
 
   singaporeSectionText.appendChild(name);
   singaporeSectionText.appendChild(rec);
@@ -293,6 +298,11 @@ function resetProgress(keepScenario = true) {
   setFeedbackPanels(null);
   setActiveFeedback(null);
   closeAllPopups();
+  feedbackPopup.dataset.advance = 'false';
+  if (feedbackContinueBtn) {
+    feedbackContinueBtn.hidden = true;
+    feedbackContinueBtn.disabled = true;
+  }
 
   if (!keepScenario) {
     scenarioSelect.selectedIndex = 0;
@@ -303,6 +313,9 @@ function resetProgress(keepScenario = true) {
       soundOffBtn.disabled = true;
       setSoundButtons(false);
     }
+  } else if (activeScenario) {
+    activeRoundIndex = 0;
+    updateRoundUi({ openInfo: false });
   }
 }
 
@@ -320,26 +333,51 @@ function updateLeaderText(actorKey, element) {
     element.textContent = 'Select a scenario first.';
     return;
   }
+  const round = getActiveRound();
   const keyMap = {
     US: 'US',
     China: 'China',
     Cambodia: 'Cambodia'
   };
   const lookupKey = keyMap[actorKey] || actorKey;
-  const address = activeScenario.televised_addresses?.[lookupKey] || '';
+  const address = round?.televised_addresses?.[lookupKey] || '';
   element.textContent = address || 'No address available.';
 }
 
-function applyScenario(scenario) {
-  activeScenario = scenario;
-  scenarioTitle.textContent = scenario.title;
-  infoTitle.textContent = scenario.title;
-  infoText.textContent = scenario.scenario_text;
-  respondTitle.textContent = 'Select a cabinet recommendation to proceed.';
-  feedbackTitle.textContent = scenario.title;
-  resetProgress(true);
+function getRounds(scenario) {
+  if (!scenario) return [];
+  if (Array.isArray(scenario.rounds) && scenario.rounds.length) {
+    return scenario.rounds;
+  }
+  return [{
+    title: scenario.title,
+    scenario_text: scenario.scenario_text,
+    televised_addresses: scenario.televised_addresses,
+    cabinet_recommendations: scenario.cabinet_recommendations,
+    alignment_responses: scenario.alignment_responses
+  }];
+}
 
-  const showCambodia = Boolean(scenario.televised_addresses?.Cambodia);
+function getActiveRound() {
+  const rounds = getRounds(activeScenario);
+  return rounds[activeRoundIndex] || rounds[0] || null;
+}
+
+function updateRoundUi({ openInfo = false } = {}) {
+  const round = getActiveRound();
+  if (!activeScenario || !round) return;
+  const roundLabel = round.title ? `${activeScenario.title} - ${round.title}` : activeScenario.title;
+  if (round.title) {
+    scenarioTitle.innerHTML = `<span class="title-main">${activeScenario.title}</span><span class="title-sub">- ${round.title}</span>`;
+  } else {
+    scenarioTitle.textContent = activeScenario.title;
+  }
+  infoTitle.textContent = roundLabel;
+  infoText.textContent = round.scenario_text;
+  respondTitle.textContent = 'Select a cabinet recommendation to proceed.';
+  feedbackTitle.textContent = roundLabel;
+
+  const showCambodia = Boolean(round.televised_addresses?.Cambodia);
   setCambodiaVisibility(showCambodia);
   feedbackCambodiaBtn.style.display = showCambodia ? 'block' : 'none';
 
@@ -355,9 +393,9 @@ function applyScenario(scenario) {
     soundOffBtn.disabled = false;
   }
 
-  const mindef = scenario.cabinet_recommendations?.MINDEF;
-  const mti = scenario.cabinet_recommendations?.MTI;
-  const mha = scenario.cabinet_recommendations?.MHA;
+  const mindef = round.cabinet_recommendations?.MINDEF;
+  const mti = round.cabinet_recommendations?.MTI;
+  const mha = round.cabinet_recommendations?.MHA;
   if (respondMindefBtn) {
     respondMindefBtn.textContent = mindef?.recommendation || 'MINDEF recommendation unavailable.';
   }
@@ -368,7 +406,16 @@ function applyScenario(scenario) {
     respondMhaBtn.textContent = mha?.recommendation || 'MHA recommendation unavailable.';
   }
 
-  openPopup(infoPopup);
+  if (openInfo) {
+    openPopup(infoPopup);
+  }
+}
+
+function applyScenario(scenario) {
+  activeScenario = scenario;
+  activeRoundIndex = 0;
+  resetProgress(true);
+  updateRoundUi({ openInfo: true });
 }
 
 function renderScenarioOptions() {
@@ -475,7 +522,8 @@ if (singaporeBtn) {
 if (singaporeFace1Btn) {
   singaporeFace1Btn.addEventListener('click', () => {
     if (!activeScenario) return;
-    const mindef = activeScenario.cabinet_recommendations?.MINDEF;
+    const round = getActiveRound();
+    const mindef = round?.cabinet_recommendations?.MINDEF;
     setCabinetPanel({
       minister: mindef?.minister || 'Minister for Defence',
       recommendation: mindef?.recommendation || '',
@@ -487,7 +535,8 @@ if (singaporeFace1Btn) {
 if (singaporeFace2Btn) {
   singaporeFace2Btn.addEventListener('click', () => {
     if (!activeScenario) return;
-    const mti = activeScenario.cabinet_recommendations?.MTI;
+    const round = getActiveRound();
+    const mti = round?.cabinet_recommendations?.MTI;
     setCabinetPanel({
       minister: mti?.minister || 'Minister for Trade and Industry',
       recommendation: mti?.recommendation || '',
@@ -499,7 +548,8 @@ if (singaporeFace2Btn) {
 if (singaporeFace3Btn) {
   singaporeFace3Btn.addEventListener('click', () => {
     if (!activeScenario) return;
-    const mha = activeScenario.cabinet_recommendations?.MHA;
+    const round = getActiveRound();
+    const mha = round?.cabinet_recommendations?.MHA;
     setCabinetPanel({
       minister: mha?.minister || 'Minister for Home Affairs',
       recommendation: mha?.recommendation || '',
@@ -524,7 +574,8 @@ if (soundOnBtn && soundOffBtn) {
 }
 
 function buildFeedbackFromAlignment(alignmentKey) {
-  const alignment = activeScenario?.alignment_responses?.[alignmentKey];
+  const round = getActiveRound();
+  const alignment = round?.alignment_responses?.[alignmentKey];
   if (!alignment) return null;
   return {
     us: alignment.us_feedback || '',
@@ -540,6 +591,8 @@ function handleRecommendationChoice(alignmentKey) {
     status.textContent = 'Select a scenario first.';
     return;
   }
+  const rounds = getRounds(activeScenario);
+  const hasNextRound = activeRoundIndex < rounds.length - 1;
 
   const blocks = buildFeedbackFromAlignment(alignmentKey);
   if (!blocks) {
@@ -555,6 +608,11 @@ function handleRecommendationChoice(alignmentKey) {
   closePopup(respondPopup);
   openPopup(feedbackPopup);
   status.textContent = '';
+  feedbackPopup.dataset.advance = hasNextRound ? 'true' : 'false';
+  if (feedbackContinueBtn) {
+    feedbackContinueBtn.hidden = !hasNextRound;
+    feedbackContinueBtn.disabled = !hasNextRound;
+  }
 }
 
 if (respondMindefBtn) {
@@ -587,8 +645,23 @@ Array.from(document.querySelectorAll('.popup-close')).forEach((btn) => {
     if (popupId) {
       closePopup(document.getElementById(popupId));
     }
+    if (popupId === 'popup-feedback') {
+      feedbackPopup.dataset.advance = 'false';
+    }
   });
 });
+
+if (feedbackContinueBtn) {
+  feedbackContinueBtn.addEventListener('click', () => {
+    const shouldAdvance = feedbackPopup.dataset.advance === 'true';
+    feedbackPopup.dataset.advance = 'false';
+    closePopup(feedbackPopup);
+    if (shouldAdvance) {
+      activeRoundIndex += 1;
+      updateRoundUi({ openInfo: true });
+    }
+  });
+}
 
 loadScenarios();
 
